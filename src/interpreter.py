@@ -117,7 +117,7 @@ class DummyInterpreter:
                 self.console.flush()
         return
     
-    def stop_sound(self):
+    def get_stop_sound(self):
         """ Returns the string for stopping all sound in a language """
         return ""
     
@@ -287,11 +287,11 @@ class FoxDotInterpreter(BuiltinInterpreter):
         return []
 
     def kill(self):
-        self.evaluate(self.stop_sound())
+        self.evaluate(self.get_stop_sound())
         Interpreter.kill(self)
         return
 
-    def stop_sound(self):
+    def get_stop_sound(self):
         return "Clock.clear()"
 
 class TidalInterpreter(BuiltinInterpreter):
@@ -346,7 +346,7 @@ class TidalInterpreter(BuiltinInterpreter):
         """ Used to formant multiple lines in haskell """
         return ":{\n"+string+"\n:}\n"
 
-    def stop_sound(self):
+    def get_stop_sound(self):
         """ Triggers the 'hush' command using Ctrl+. """
         return "hush"
 
@@ -368,7 +368,7 @@ class OSCInterpreter(Interpreter):
         return DummyInterpreter.start(self, *args, **kwargs)
 
     def kill(self):
-        self.evaluate(self.stop_sound())
+        self.evaluate(self.get_stop_sound())
         self.lang.close()
         return
 
@@ -505,7 +505,7 @@ class SuperColliderInterpreter(OSCInterpreter):
             return None, None
 
 
-    def stop_sound(self):
+    def get_stop_sound(self):
         return "s.freeAll"
         
 

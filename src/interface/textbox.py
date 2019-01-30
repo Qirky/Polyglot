@@ -295,7 +295,7 @@ class ThreadSafeText(Tk.Text, OTClient):
         """ Evaluates a string as code """
 
         peer = self.root.get_peer(message)
-        
+
         self.parent.lang.evaluate(message["string"], name=str(peer), colour=peer.bg)
 
         return
@@ -464,9 +464,9 @@ class ThreadSafeText(Tk.Text, OTClient):
 
             self.root.peer_tags.append(text_tag)
 
-            fg, _ = PeerFormatting(int(p_id))
+        fg, _ = PeerFormatting(int(p_id))
 
-            self.tag_config(text_tag, foreground=fg)
+        self.tag_config(text_tag, foreground=fg)
 
         self.tag_remove(text_tag, "1.0", Tk.END)
 
