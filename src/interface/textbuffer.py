@@ -990,5 +990,6 @@ class BufferTab(Tk.LabelFrame):
     # Language dependent commands
     def get_stop_sound(self, *event):
         """ Sends a kill all sound message to the server based on the language """
-        self.send_message( MSG_EVALUATE_STRING(self.root.local_peer.id, self.lang.get_stop_sound(), reply=1) )
+        string = DEFAULT_INTERPRETERS[self.id].get_stop_sound()
+        self.send_message( MSG_EVALUATE_STRING(self.root.local_peer.id, string, reply=1) )
         return "break"

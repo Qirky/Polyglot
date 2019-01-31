@@ -50,6 +50,7 @@ def colour_format(text, colour):
 ## dummy interpreter
 
 class DummyInterpreter:
+    stop_sound = ""
     def __init__(self, *args, **kwargs):
         self.re={}
 
@@ -117,9 +118,10 @@ class DummyInterpreter:
                 self.console.flush()
         return
     
-    def get_stop_sound(self):
+    @classmethod
+    def get_stop_sound(cls):
         """ Returns the string for stopping all sound in a language """
-        return ""
+        return cls.stop_sound
     
     @staticmethod
     def format(string):
@@ -254,6 +256,7 @@ class BuiltinInterpreter(Interpreter):
 
 class FoxDotInterpreter(BuiltinInterpreter):
     name = "FoxDot"
+    stop_sound = "Clock.clear()"
     filetype=".py"
     path = "{} -u -m FoxDot --pipe".format(PYTHON_EXECUTABLE)
     id = 0
@@ -291,13 +294,11 @@ class FoxDotInterpreter(BuiltinInterpreter):
         Interpreter.kill(self)
         return
 
-    def get_stop_sound(self):
-        return "Clock.clear()"
-
 class TidalInterpreter(BuiltinInterpreter):
     name = "TidalCycles"
     path = 'ghci'
     filetype = ".tidal"
+    stop_sound = "hush"
     id = 1
 
     def start(self, *args, **kwargs):
@@ -346,10 +347,6 @@ class TidalInterpreter(BuiltinInterpreter):
         """ Used to formant multiple lines in haskell """
         return ":{\n"+string+"\n:}\n"
 
-    def get_stop_sound(self):
-        """ Triggers the 'hush' command using Ctrl+. """
-        return "hush"
-
 class StackTidalInterpreter(TidalInterpreter):
     path = "stack ghci"
 
@@ -385,6 +382,7 @@ class OSCInterpreter(Interpreter):
 
 class SuperColliderInterpreter(OSCInterpreter):
     name = "SuperCollider"
+    stop_sound = "s.freeAll"
     filetype = ".scd"
     host = 'localhost'
     port = 57120
@@ -503,10 +501,6 @@ class SuperColliderInterpreter(OSCInterpreter):
             cur_x = 0
         else:
             return None, None
-
-
-    def get_stop_sound(self):
-        return "s.freeAll"
         
 
 # langtypes = { FOXDOT        : FoxDotInterpreter,
