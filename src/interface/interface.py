@@ -10,6 +10,7 @@ from .peer import Peer, rgb2hex, hex2rgb
 from .bracket import BracketHandler
 from .menu_bar import MenuBar, PopupMenu
 from .textbuffer import BufferTab
+from .drag import VerticalDragbar
 
 from .tkimport import Tk, tkFont
 
@@ -170,6 +171,25 @@ class Interface(BasicInterface):
 
         self.buffers[0].text.focus_force()
 
+        self.buffer_frame.grid_propagate(False)
+        self.root.update_idletasks()
+
+        def set_widths():
+
+            widths=[]
+
+            for i, buf in self.buffers.items():
+
+                widths.append(buf.winfo_width())
+
+                self.buffer_frame.columnconfigure(i*2, weight=0)
+
+                buf.config(width=widths[i])
+
+            return
+
+        self.root.after(200, set_widths)
+
         # Begin listening for messages
 
         self.listen()
@@ -202,11 +222,20 @@ class Interface(BasicInterface):
     # =========================
 
     def add_new_buffer(self, lang_id, lang):
-        """ TODO - use lang not str/id """
-        c = len(self.buffers)
+        """  """
+        col = (len(self.buffers) * 2)
+
         self.buffers[lang_id] = BufferTab(self, lang_id, lang())
-        self.buffers[lang_id].grid(row=0, column=c, sticky=Tk.NSEW)
-        self.buffer_frame.columnconfigure(c, weight=1)
+        self.buffers[lang_id].grid(row=0, column=col, sticky=Tk.NSEW)
+
+        if col > 0: # only works with langs in serial
+        
+            dragbar1 = VerticalDragbar(self, self.buffers[lang_id - 1], self.buffers[lang_id], bg="Gray", width=2)
+            dragbar1.grid(row=0, column=col - 1, sticky=Tk.NSEW)
+
+        self.buffer_frame.columnconfigure(col, weight=1)
+        self.buffers[lang_id].grid_propagate(False)
+        
         return
 
     # Handle methods
@@ -645,6 +674,10 @@ class Interface(BasicInterface):
 
     # Misc.
     # =====
+
+    def active_buffer(self):
+        """ Returns the buffer that the local peer is in """
+        return self.local_peer.get_buffer()
 
     def OpenGitHub(self, event=None):
         """ Opens the Troop GitHub page in the default web browser """

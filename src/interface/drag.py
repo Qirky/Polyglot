@@ -21,12 +21,12 @@ class Dragbar(Tk.Frame):
     def drag_mouseclick(self, event):
         """ Allows the user to resize the console height """
         self.mouse_down = True
-        self.root.grid_propagate(False)
+        self.parent.grid_propagate(False)
         return
     
     def drag_mouserelease(self, event):
         self.mouse_down = False
-        self.app.text.focus_set()
+        self.root.active_buffer().text.focus_set()
         return
 
     def drag_mousedrag(self, event):
@@ -40,26 +40,60 @@ class Dragbar(Tk.Frame):
 
             new_height =  ( self.parent.console.winfo_height() + (widget_y - event.y_root) )
 
-            # Update heights of console / graphs
+            # Update heights of console
 
             self.parent.console.config(height = int(max(2, new_height / line_height)))
 
         return "break"
 
-# class ConsoleDragbar(Dragbar):
-#     cursor_style="sb_h_double_arrow"
-#     def drag_mousedrag(self, event):
-#         """ Resize the canvas """
-#         if self.mouse_down:
+class VerticalDragbar(Tk.Frame):
+    cursor_style="sb_h_double_arrow"
+    def __init__(self, root, main, sub, *args, **kwargs):
 
-#             widget_x = self.app.graphs.winfo_rootx() # Location of the graphs
+        self.root   = root # interface
+        self.parent = root.buffer_frame # frame for buffers
+        self.buf1 = main # buffer
+        self.buf2 = sub
 
-#             new_width =  self.app.graphs.winfo_width() + (widget_x - event.x_root)
+        kwargs["cursor"]=self.cursor_style
 
-#             self.app.graphs.config(width = int(new_width))
+        Tk.Frame.__init__( self, self.parent, **kwargs )
 
-#             console_width = (self.app.root.winfo_width() - new_width) / self.app.text.char_w
-            
-#             self.app.console.config(width = int(console_width))
+        self.mouse_down = False
+        
+        self.bind("<Button-1>",        self.drag_mouseclick)        
+        self.bind("<ButtonRelease-1>", self.drag_mouserelease)
+        self.bind("<B1-Motion>",       self.drag_mousedrag)
 
-#         return "break"
+    def drag_mouseclick(self, event):
+        """ Allows the user to resize the console height """
+        self.mouse_down = True
+        self.parent.grid_propagate(False)
+        return
+    
+    def drag_mouserelease(self, event):
+        self.mouse_down = False
+        self.root.active_buffer().text.focus_set()
+        return
+
+    def drag_mousedrag(self, event):
+        """ Resize the canvas """
+        if self.mouse_down:
+
+            # Main buffer
+
+            width1 = self.buf1.winfo_width()
+            width2 = self.buf2.winfo_width()
+            delta  = event.x
+
+            new_width = width1 + delta
+
+            self.buf1.config(width=int(new_width))
+
+            new_width  = width2 - delta
+
+            self.buf2.config(width=int(new_width))
+
+            self.winfo_toplevel().update_idletasks()
+
+        return "break"
