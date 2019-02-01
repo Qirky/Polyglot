@@ -11,6 +11,7 @@ from .bracket import BracketHandler
 from .menu_bar import MenuBar, PopupMenu
 from .textbuffer import BufferTab
 from .drag import VerticalDragbar
+from .status_bar import StatusBar
 
 from .tkimport import Tk, tkFont
 
@@ -52,7 +53,6 @@ class BasicInterface:
         """ Starts the Tkinter loop and exits cleanly if interrupted"""
         # Continually check for messages to be sent
         self.client.update_send()
-        # self.update_graphs() # TODO update
         self.client.input.mainloop()
         return
 
@@ -147,7 +147,8 @@ class Interface(BasicInterface):
         self.buffer_frame = Tk.Frame(self.root, bg=COLOURS["Background"])
         self.buffer_frame.grid(row=0, column=0, sticky=Tk.NSEW)
 
-        self.status_bar = Tk.Frame(self.root, height=25, bg="Gray")
+        self.status_bar = StatusBar(self, height=25, bg="Gray", padx=10, pady=5)
+        # self.status_bar = Tk.Frame(self.root, height=25, bg="Red")
         self.status_bar.grid(row=1, column=0, sticky=Tk.NSEW)
 
         self.root.rowconfigure(0, weight=1) # buffer frame
@@ -433,99 +434,6 @@ class Interface(BasicInterface):
         self.root.title(self.title)
         return
 
-    # TODO-UPDATE : draw square and % of text in self.status_bar
-    def update_graphs(self):
-        """ Continually counts the number of coloured chars and update self.graphs """
-
-        # TODO -- draw graph for peers no longer connected?
-
-        # Only draw graphs once the peer(s) connects
-
-        if len(self.text.peers) == 0:
-
-            self.root.after(100, self.update_graphs)
-
-            return
-
-        # For each connected peer, find the range covered by the tag
-
-        for peer in self.text.peers.values():
-
-            tag_name = peer.text_tag
-
-            loc = self.text.tag_ranges(tag_name)
-
-            count = 0
-
-            if len(loc) > 0:
-
-                for i in range(0, len(loc), 2):
-
-                    start, end = loc[i], loc[i+1]
-
-                    start = self.convert(start)
-                    end   = self.convert(end)
-
-                    # If the range is on the same line, just count
-
-                    if start[0] == end[0]:
-
-                        count += (end[1] - start[1])
-
-                    else:
-
-                        # Get the first line
-
-                        count += (self.convert(self.text.index("{}.end".format(start[0])))[1] - start[1])
-
-                        # If it spans multiple lines, just count all characters
-
-                        for line in range(start[0] + 1, end[0]):
-
-                            count += self.convert(self.text.index("{}.end".format(line)))[1]
-
-                        # Add the number of the last line
-
-                        count += end[1]
-
-            peer.count = count
-
-        # Once we count all, work out percentages and draw graphs
-
-        total = float(sum([p.count for p in self.text.peers.values()]))
-
-        max_height = self.graphs.winfo_height()
-        max_width  = self.graphs.winfo_width()
-
-        # Gaps between edges
-
-        offset_x = 10
-        offset_y = 10
-
-        # Graph widths should all fit within the graph box but have maximum width of 40
-
-        graph_w = min(40, (max_width - (2 * offset_x)) / len(self.text.peers))
-
-        for n, peer in enumerate(self.text.peers.values()):
-
-            if peer.graph is not None:
-
-                height = ((peer.count / total) * max_height) if total > 0 else 0
-
-                x1 = (n * graph_w) + offset_x
-                y1 = max_height + offset_y
-                x2 = x1 + graph_w
-                y2 = y1 - (int(height))
-
-                self.graphs.coords(peer.graph, (x1, y1, x2, y2))
-
-            # TODO -- Write number / name? Maybe when hovered?
-
-        self.root.update_idletasks()
-        self.root.after(100, self.update_graphs)
-
-        return
-
     # Sending messages to the server
     # ==============================
 
@@ -687,7 +595,7 @@ class Interface(BasicInterface):
     def redraw(self):
         """ Calls redraw method for each buffer """
         for buf in self.buffers.values():
-            buf.redraw()
+            buf.redraw()        
         return
 
     def configure_font(self):

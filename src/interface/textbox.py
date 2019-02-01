@@ -123,9 +123,13 @@ class ThreadSafeText(Tk.Text, OTClient):
 
                 raise err
 
-            self.set_text(new_text)
+            self.document = new_text
 
             self.insert_peer_id(peer, operation.ops)
+
+            # Redraw status bar after an operation
+
+            self.refresh()
 
         return
 
@@ -336,11 +340,11 @@ class ThreadSafeText(Tk.Text, OTClient):
         """ Deletes the contents of the string """
         return self.delete("1.0", Tk.END)
 
-    def set_text(self, string):
-        """ Sets the contents of the textbox to string"""
-        self.document = string
-        self.refresh()
-        return
+    # def set_text(self, string):
+    #     """ Sets the contents of the textbox to string"""
+    #     self.document = string
+    #     self.refresh()
+    #     return
 
     def read(self):
         """ Returns the entire contents of the text box as a string """
@@ -491,6 +495,7 @@ class ThreadSafeText(Tk.Text, OTClient):
         # Update the  colours and formatting
         self.update_colours()
         self.apply_language_formatting()
+        self.root.status_bar.redraw()
 
         self.is_refreshing = False
         
