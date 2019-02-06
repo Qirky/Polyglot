@@ -79,9 +79,13 @@ class Receiver:
 
             except(OSError, socket.error) as e:
 
-                print(e)
+                # Don't bother printing error messages if we have flagged this as not running
 
-                self.kill()
+                if self.running:
+
+                    print(e)
+
+                    self.kill()
 
                 break
 
