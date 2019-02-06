@@ -65,16 +65,6 @@ class BasicInterface:
         """ Overloaded in Interface class """
         return
 
-# class DummyInterface(BasicInterface):
-#     """ Only implemented in server debug mode """
-#     def __init__(self):
-#         BasicInterface.__init__(self)
-#         self.lang = DummyInterpreter()
-#         self.text=ThreadSafeText(self, bg=COLOURS["Background"], fg="white", insertbackground=COLOURS["Background"], height=15, bd=0)
-#         self.text.grid(row=0, column=0, sticky="nsew")
-#         self.text.marker = Peer(-1, self.text)
-#         self.lang.start()
-
 class Interface(BasicInterface):
     def __init__(self, client, title, lang_data, logging=False):
 
@@ -148,7 +138,6 @@ class Interface(BasicInterface):
         self.buffer_frame.grid(row=0, column=0, sticky=Tk.NSEW)
 
         self.status_bar = StatusBar(self, height=25, bg="Gray", padx=10, pady=5)
-        # self.status_bar = Tk.Frame(self.root, height=25, bg="Red")
         self.status_bar.grid(row=1, column=0, sticky=Tk.NSEW)
 
         self.root.rowconfigure(0, weight=1) # buffer frame
@@ -161,10 +150,6 @@ class Interface(BasicInterface):
         for i, lang in self.lang_data.items():
 
             self.add_new_buffer(i, lang)
-
-        # Statistics Graphs -- maybe un-needed
-        # self.graphs = Tk.Canvas(self.root, bg=COLOURS["Stats"], width=350, bd=0, highlightthickness=0)
-        # self.graphs.grid(row=2, column=3, sticky="nsew")
 
         self.block_messages = False # flag to stop sending messages
 
