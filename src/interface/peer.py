@@ -330,7 +330,9 @@ class Peer:
         buf_widget  = self.get_buffer()
         text_widget = self.get_text_widget()
 
-        self.bbox = text_widget.bbox(self.mark)
+        # self.bbox = text_widget.bbox(self.mark)
+
+        self.bbox = text_widget.bbox(self.get_tcl_index())
 
         if self.bbox is not None:
 

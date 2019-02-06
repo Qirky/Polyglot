@@ -127,6 +127,8 @@ class ThreadSafeText(Tk.Text, OTClient):
 
             self.insert_peer_id(peer, operation.ops)
 
+            peer.de_select()
+
             # Redraw status bar after an operation
 
             self.refresh()
