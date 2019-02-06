@@ -169,6 +169,10 @@ class Interpreter(DummyInterpreter):
         """ Overloaded in sub-classes """
         return
 
+    def synchronise(self):
+        """ Execute code for synchronising to EspGrid. Overloaded in sub-classes. """
+        return
+
     def start(self, *args, **kwargs):
         """ Opens the process with the interpreter language """
 
@@ -265,6 +269,9 @@ class FoxDotInterpreter(BuiltinInterpreter):
         self.keywords = ["Clock", "Scale", "Root", "var", "linvar", '>>']
         self.keyword_regex = compile_regex(self.keywords)
 
+    def synchronise(self):
+        return self.evaluate("Clock.sync_to_espgrid()")
+
     def __repr__(self):
         return "FoxDot"
 
@@ -324,6 +331,9 @@ class TidalInterpreter(BuiltinInterpreter):
 
     def __repr__(self):
         return "TidalCycles"
+
+    def synchronise(self):
+        return self.evaluate("")
 
     @classmethod
     def find_comment(cls, string):        
@@ -396,6 +406,9 @@ class SuperColliderInterpreter(OSCInterpreter):
         msg = OSC.OSCMessage("/troop")
         msg.append([string])
         return msg
+
+    def synchronise(self):
+        return self.evaluate("TempoClock.default = EspClock.new")
 
     @classmethod
     def find_comment(cls, string):        
