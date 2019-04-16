@@ -155,7 +155,11 @@ class Interface(BasicInterface):
 
         # Set the window focus
 
-        self.buffers[0].text.focus_force()
+        # Could get the id for language selected? *TODO*
+
+        start_id = 0
+
+        self.buffers[start_id].text.focus_force()
 
         self.buffer_frame.grid_propagate(False)
         self.root.update_idletasks()
@@ -208,7 +212,7 @@ class Interface(BasicInterface):
     # =========================
 
     def add_new_buffer(self, lang_id, lang):
-        """  """
+        """ Creates a text buffer and activates the language interpreter """
         col = (len(self.buffers) * 2)
 
         self.buffers[lang_id] = BufferTab(self, lang_id, lang())
