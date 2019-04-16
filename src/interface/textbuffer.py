@@ -185,6 +185,7 @@ class BufferTab(Tk.LabelFrame):
         # Startup interpreter -- give interpreter information about this widget - i.e. console
 
         self.lang.start(out=self.console)
+        self.lang.synchronise()
 
     def __str__(self):
         return "<Buffer - {}>".format(self.lang)

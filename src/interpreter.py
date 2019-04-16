@@ -117,6 +117,10 @@ class DummyInterpreter:
                 self.console.write(colour_format("." * n, colour) + _ + string[i])
                 self.console.flush()
         return
+
+    def synchronise(self):
+        """ Execute code for synchronising to EspGrid. Overloaded in sub-classes. """
+        return
     
     @classmethod
     def get_stop_sound(cls):
@@ -167,10 +171,6 @@ class Interpreter(DummyInterpreter):
 
     def setup(self):
         """ Overloaded in sub-classes """
-        return
-
-    def synchronise(self):
-        """ Execute code for synchronising to EspGrid. Overloaded in sub-classes. """
         return
 
     def start(self, *args, **kwargs):
