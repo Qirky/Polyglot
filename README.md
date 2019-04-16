@@ -30,7 +30,7 @@ To synchronise the musical events across different live coding environments, Pol
 
 If you have installed FoxDot and/or TidalCycles you will have encountered "Quarks" for SuperCollider, which are external libraries for the language. Any users who wish  to use SuperCollider as the host language will need to install the "Troop" quark and the "EspGrid" quark using the following code:
 
-    Quarks.install("http://github.com/Qirky/TroopQuark.git")
+    Quarks.install("http://github.com/Qirky/TroopQuark.git");
     Quarks.install("https://github.com/d0kt0r0/Esp.sc.git");
 
 Simply copy and paste it into the SuperCollider window and press `Ctrl+Enter`.
