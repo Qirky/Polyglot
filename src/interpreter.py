@@ -333,7 +333,7 @@ class TidalInterpreter(BuiltinInterpreter):
         return "TidalCycles"
 
     def synchronise(self):
-        return self.evaluate("")
+        return self.evaluate("tidalEspGridLink (sTempoMV tidal)")
 
     @classmethod
     def find_comment(cls, string):        
@@ -396,7 +396,7 @@ class SuperColliderInterpreter(OSCInterpreter):
     filetype = ".scd"
     host = 'localhost'
     port = 57120
-    id = 1
+    id = 2
 
     def __repr__(self):
         return "SuperCollider"
