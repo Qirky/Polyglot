@@ -45,6 +45,16 @@ One user (or a separate machine) is running the server application (see "Running
 
 **IMPORTANT** - Make sure you run `Troop.start` / `FoxDot.start` in SuperCollider before opening PolyGlot if you are using SuperCollider or FoxDot as the host language.
 
-## Running the Server
+## Running PolyGlot
 
-## Running the Client
+PolyGlot requires Python (2 or 3) to be installed on your system, which can be downloaded here: [https://www.python.org/](https://www.python.org/).
+
+### Running the Server
+
+One user needs to be running the server application. This can be done using the command `python run-server.py`, which will prompt the user for a password. Type the password you want (can be left blank) and press return. The console should now display the IP address of the machine and information about users joining / leaving the session.
+
+### Running the Client
+
+To open the client, run `python run-client.py`, which will open a login window that will require the IP address and port number (as seen on the server application window) a user name and the server's password. It also has a set of tick boxes for "active languages": these are the languages you will be hosting on your machine. So if you are only running FoxDot, untick TidalCycles and SuperCollider and press OK to log in.
+
+You will then be greeted with an interface with three text boxes; one for each language. Type code and press `Ctrl+Enter` to run!
