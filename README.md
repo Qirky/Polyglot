@@ -33,7 +33,7 @@ If you have installed FoxDot and/or TidalCycles you will have encountered "Quark
     Quarks.install("http://github.com/Qirky/TroopQuark.git");
     Quarks.install("https://github.com/d0kt0r0/Esp.sc.git");
 
-Simply copy and paste it into the SuperCollider window and press `Ctrl+Enter`.
+Simply copy and paste it into the SuperCollider window, highlight both lines and press `Ctrl+Enter`.
 
 ### 4. Setting up for playing
 
