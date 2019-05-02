@@ -270,7 +270,9 @@ class FoxDotInterpreter(BuiltinInterpreter):
         self.keyword_regex = compile_regex(self.keywords)
 
     def synchronise(self):
-        return self.evaluate("Clock.sync_to_espgrid()")
+        self.evaluate("Clock.latency=0.2")
+        self.evaluate("Clock.sync_to_espgrid()")
+        return
 
     def __repr__(self):
         return "FoxDot"
@@ -333,7 +335,7 @@ class TidalInterpreter(BuiltinInterpreter):
         return "TidalCycles"
 
     def synchronise(self):
-        return self.evaluate("tidalEspGridLink (sTempoMV tidal)")
+        return self.evaluate("espgrid tidal")
 
     @classmethod
     def find_comment(cls, string):        
@@ -408,7 +410,9 @@ class SuperColliderInterpreter(OSCInterpreter):
         return msg
 
     def synchronise(self):
-        return self.evaluate("TempoClock.default = EspClock.new")
+        self.evaluate("s.latency=0.2")
+        self.evaluate("TempoClock.default = EspClock.new")
+        return
 
     @classmethod
     def find_comment(cls, string):        
