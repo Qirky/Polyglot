@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from .tkimport import Tk
+from .tkimport import Tk, tkFileDialog, tkMessageBox
 
 from .textbox import ThreadSafeText
 from .console import Console
@@ -139,6 +139,10 @@ class BufferTab(Tk.LabelFrame):
         # # Undo -- not implemented
         self.text.bind("<{}-z>".format(CtrlKey), self.undo)
         self.text.bind("<{}-y>".format(CtrlKey), self.redo)
+
+        # Open a file
+
+        self.text.bind("<{}-o>".format(CtrlKey), self.open)        
 
         # Handling mouse events
         self.left_mouse = Mouse(self)
@@ -903,6 +907,23 @@ class BufferTab(Tk.LabelFrame):
         if len(self.text.redo_stack):
             op = self.text.get_redo_operation()
             self.apply_operation(self.new_operation(*op.ops), index=get_operation_index(op.ops), redo=True)
+        return "break"
+
+    def open(self, event=None):
+        ''' Opens the  open file window, and imports the text indo the buffer tab - replacing everything '''
+
+        fn = tkFileDialog.askopenfilename()
+
+        try:
+
+            with open(fn) as f:
+
+                self.apply_operation(self.get_set_all_operation(f.read()))
+
+        except Exception as e:
+
+            tkMessageBox.showwarning("Failed to open file", "Could not open file '{}'.\n\n{}".format(fn, str(e)))
+
         return "break"
 
     def copy(self, event=None):
