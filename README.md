@@ -43,7 +43,10 @@ The diagram below outlines how a typical PolyGlot session might look like:
 
 One user (or a separate machine) is running the server application (see "Running the Server" for more information on doing this) and every user is running the client, which is connected to the server. Each user is hosting a different language except one, which is hosting none. All users are co-located and can hear the audio output from any users hosting a language. EspGrid is running on the network, which each language is communicating with to synchronise audio. All users can use the client to execute code on the machine hosting the corresponding language.
 
-**IMPORTANT** - Make sure you run `Troop.start` / `FoxDot.start` in SuperCollider before opening PolyGlot if you are using SuperCollider or FoxDot as the host language.
+**IMPORTANT** 
+
+- Make sure you start EspGrid *before* PolyGlot. EspGrid seems to works best in clock mode 2, which FoxDot will set it to automatically. If you are not using FoxDot then you will need to start EspGrid with a `-clockMode 2` flag.
+- Make sure you run `Troop.start` / `FoxDot.start` in SuperCollider before opening PolyGlot if you are using SuperCollider or FoxDot as the host language.
 
 ## Running PolyGlot
 
