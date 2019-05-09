@@ -136,13 +136,17 @@ class BufferTab(Tk.LabelFrame):
         self.text.bind("<{}-x>".format(CtrlKey), self.cut)
         self.text.bind("<{}-v>".format(CtrlKey), self.paste)
 
-        # # Undo -- not implemented
+        # # Undo
         self.text.bind("<{}-z>".format(CtrlKey), self.undo)
         self.text.bind("<{}-y>".format(CtrlKey), self.redo)
 
         # Open a file
 
-        self.text.bind("<{}-o>".format(CtrlKey), self.open)        
+        self.text.bind("<{}-o>".format(CtrlKey), self.open)   
+
+        # Switching buffers
+
+        self.text.bind("<{}-Tab>".format(CtrlKey), self.cycle_buffer)                
 
         # Handling mouse events
         self.left_mouse = Mouse(self)
@@ -376,14 +380,13 @@ class BufferTab(Tk.LabelFrame):
 
         index = self.root.local_peer.get_index_num()
         sel_size = self.root.local_peer.selection_size()
-        doc_size = len(self.text.read())
 
         if index == self.root.local_peer.select_end():
             offset = len(insert) - sel_size
         elif index == self.root.local_peer.select_start():
             offset = len(insert)
         else:
-            raise IndexError("Selection indicies do not match")
+            raise IndexError("Selection indices do not match")
         return offset
 
     def get_set_all_operation(self, text):
@@ -1008,6 +1011,27 @@ class BufferTab(Tk.LabelFrame):
         """ Calls any redraw method e.g. line numbers """
         self.line_numbers.redraw()
         return
+
+    def cycle_buffer(self, event=None):
+        """ Moves the cursor to the next text buffer """
+        
+        new_id = (self.id + 1) % len(self.root.buffers)
+        new_buf = self.root.buffers[new_id]
+
+        # Remove any bracket highlighting
+
+        self.remove_highlighted_brackets()
+        self.de_select()
+
+        # Get location and process
+
+        self.root.local_peer.move(new_id, 0)
+
+        new_buf.send_message( MSG_SET_MARK(self.root.local_peer.id, 0) )
+
+        new_buf.text.focus_set()
+
+        return "break"
 
     # Language dependent commands
     def get_stop_sound(self, *event):
