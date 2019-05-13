@@ -180,6 +180,12 @@ class Interface(BasicInterface):
 
                 buf.config(width=widths[i])
 
+            # Redraw peer labels to fit
+
+            for _, peer in self.peers.items():
+                
+                peer.redraw()
+
             return
 
         self.root.after(200, set_widths)
