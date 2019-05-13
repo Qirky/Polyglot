@@ -17,7 +17,7 @@ import string
 class BufferTab(Tk.LabelFrame):
     """ Widget for containing a Text buffer, console, and scroll widgets for each
         language used in Polyglot """
-    def __init__(self, parent, buffer_id, lang, *args, **kwargs):
+    def __init__(self, parent, buffer_id, lang, sync_to_espgrid, *args, **kwargs):
         
         Tk.LabelFrame.__init__(self, parent.buffer_frame, 
             text=str(DEFAULT_INTERPRETERS[buffer_id].name), 
@@ -31,6 +31,7 @@ class BufferTab(Tk.LabelFrame):
 
         self.root = parent # interface
         self.lang = lang
+        self.sync_to_espgrid = sync_to_espgrid
         self.id   = int(buffer_id)
 
         # Text box
@@ -193,7 +194,12 @@ class BufferTab(Tk.LabelFrame):
         # Startup interpreter -- give interpreter information about this widget - i.e. console
 
         self.lang.start(out=self.console)
-        self.lang.synchronise()
+
+        # Only sync if told explicitly
+
+        if self.sync_to_espgrid:
+        
+            self.lang.synchronise()
 
     def __str__(self):
         return "<Buffer - {}>".format(self.lang)

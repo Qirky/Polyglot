@@ -147,9 +147,13 @@ class Interface(BasicInterface):
 
         self.buffers = {}
 
-        for i, lang in self.lang_data.items():
+        for i, lang_info in self.lang_data.items():
 
-            self.add_new_buffer(i, lang)
+            # Tuple of interpreter and EspGrid sync info
+
+            lang, sync = lang_info
+
+            self.add_new_buffer(i, lang, sync)
 
         self.block_messages = False # flag to stop sending messages
 
@@ -211,11 +215,11 @@ class Interface(BasicInterface):
     # Updating the buffer-frame
     # =========================
 
-    def add_new_buffer(self, lang_id, lang):
+    def add_new_buffer(self, lang_id, lang, sync=True):
         """ Creates a text buffer and activates the language interpreter """
         col = (len(self.buffers) * 2)
 
-        self.buffers[lang_id] = BufferTab(self, lang_id, lang())
+        self.buffers[lang_id] = BufferTab(self, lang_id, lang(), sync_to_espgrid=sync)
         self.buffers[lang_id].grid(row=0, column=col, sticky=Tk.NSEW)
 
         if col > 0: # only works with langs in serial

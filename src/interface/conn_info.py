@@ -5,6 +5,8 @@ from .tkimport import Tk, tkMessageBox, tkFileDialog
 from .interface import ROOT
 from ..interpreter import DEFAULT_INTERPRETERS, DummyInterpreter
 
+import functools
+
 class ConnectionInput:
     """ Interface for getting connection info from the user """
     def __init__(self, client, get_info=True, **kwargs):
@@ -52,17 +54,48 @@ class ConnectionInput:
             frame = Tk.LabelFrame(self.root, text="Active Languages", padx=10, pady=5)
             frame.grid(row=4, column=0, sticky=Tk.NSEW, columnspan=2)
 
+            lbl = Tk.Label(frame, text="Active")
+            lbl.grid(row = 0, column = 1, sticky=Tk.NSEW)
+            lbl = Tk.Label(frame, text="Sync")
+            lbl.grid(row = 0, column = 2, sticky=Tk.NSEW)
+
+            frame.grid_columnconfigure(1, weight=1)
+            frame.grid_columnconfigure(2, weight=1)
+
             self.checkboxes = {}
 
             for lang_id, lang in DEFAULT_INTERPRETERS.items(): 
 
-                var = Tk.IntVar()
-                var.set(1)
-                box = Tk.Checkbutton(frame, text=lang.name, variable=var)
-                box.var = var
-                box.grid(row=lang_id, column=0, sticky=Tk.W)
+                # Label
 
-                self.checkboxes[lang_id] = box
+                row_id = lang_id + 1
+
+                lbl = Tk.Label(frame, text=lang.name)
+                lbl.grid(row=row_id, column = 0, stick=Tk.W)
+
+                # Active
+
+                var1 = Tk.IntVar()
+                var1.set(1)
+                box1 = Tk.Checkbutton(frame, variable=var1)
+                box1.var = var1
+                box1.grid(row=row_id, column=1, sticky=Tk.NSEW)
+
+                # Sync
+
+                var2 = Tk.IntVar()
+                var2.set(1)
+                box2 = Tk.Checkbutton(frame, variable=var2)
+                box2.var = var2
+                box2.grid(row=row_id, column=2, sticky=Tk.NSEW)
+
+                # Set up boxes to have tick/un-tick the other appropriately
+
+                box1.config(command = functools.partial(lambda x, y: x.var.set(0) if y.var.get() == 0 else None, box2, box1))
+                box2.config(command = functools.partial(lambda x, y: x.var.set(1) if y.var.get() == 1 else y.var.set(0), box1, box2))
+
+                self.checkboxes[lang_id] = (box1, box2)
+
 
             # Ok button
             self.button=Tk.Button(self.root, text='Ok',command=self.store_data)
@@ -130,15 +163,23 @@ class ConnectionInput:
 
         lang_data = {}
 
-        for lang_id, checkbox in self.checkboxes.items():
-        
-            if checkbox.var.get() == 1:
+        for lang_id, checkboxes in self.checkboxes.items():
 
-                lang_data[lang_id] = DEFAULT_INTERPRETERS[lang_id]
+            active_box, sync_box = checkboxes
+
+            # Get info on sync to EspGrid
+
+            sync_to_esp = bool(sync_box.var.get())
+        
+            if active_box.var.get() == 1:
+
+                interpreter = DEFAULT_INTERPRETERS[lang_id]
 
             else:
 
-                lang_data[lang_id] = DummyInterpreter
+                interpreter = DummyInterpreter
+
+            lang_data[lang_id] = (interpreter, sync_to_esp)
 
         # If we have values for name, host, and port then go to "finish"
 
