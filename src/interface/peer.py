@@ -314,6 +314,12 @@ class Peer:
 
             text_widget.mark_set(self.mark, index)
 
+            # Redraw all peer labels
+
+            if text_widget.is_refreshing is False:
+
+                text_widget.refresh_peer_labels()
+
         except Tk.TclError as e:
 
             print(e)

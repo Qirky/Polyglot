@@ -494,10 +494,14 @@ class ThreadSafeText(Tk.Text, OTClient):
         self.clear()
         self.insert("1.0", self.document)
 
-        # Update the  colours and formatting
+        # Update the colours and formatting
         self.update_colours()
         self.apply_language_formatting()
         self.root.status_bar.redraw()
+
+        # Draw peer_lables - this could be done after every update / on scroll / resize
+
+        self.refresh_peer_labels()
 
         self.is_refreshing = False
         
@@ -507,6 +511,16 @@ class ThreadSafeText(Tk.Text, OTClient):
         ''' Updates the locations of the peers to their marks'''
         for peer_id, peer in self.root.peers.items():
              peer.redraw()
+        return
+
+    def yview(self, *args):
+        """ Perform scroll action and redraw peer labels """
+        Tk.Text.yview(self, *args)
+
+        if self.is_refreshing is False:
+
+            self.refresh_peer_labels()
+
         return
 
     # handling key events

@@ -34,6 +34,10 @@ class BufferTab(Tk.LabelFrame):
         self.sync_to_espgrid = sync_to_espgrid
         self.id   = int(buffer_id)
 
+        # Used to adjust refresh rate
+
+        self.frame_count = self.frame_reset = 2
+
         # Text box
         self.text=ThreadSafeText(self, bg=COLOURS["Background"], 
                                        insertbackground=COLOURS["Background"],
@@ -1015,7 +1019,10 @@ class BufferTab(Tk.LabelFrame):
 
     def redraw(self):
         """ Calls any redraw method e.g. line numbers """
-        self.line_numbers.redraw()
+        if self.frame_count == self.frame_reset:
+            self.line_numbers.redraw()
+            self.frame_count = 0
+        self.frame_count += 1
         return
 
     def cycle_buffer(self, event=None):
