@@ -32,6 +32,10 @@ This will download all the necessary files onto your computer into a folder call
 
 'Go into' the newly downloaded EspGrid folder by typing `cd EspGrid` and press Enter. Type `ls` and press Enter to see the contents of the folder. You need to 'go into' the folder called EspGrid, so type `cd EspGrid` again and press enter. Now just type `make` and press Enter and you will build the program. The easiest way to access it from Winows explorer is to go to `C:/GNUStep/msys/1.0/home/<your_username>/EspGrid/EspGrid/` and find the file called `espgrid.exe`. Copy and paste this file to wherever it will be easy to access later. You can then run it just by double clicking it.
 
+## Step 4. Run the file.
+
+To run EspGrid, just double click the `espgridd.exe` file. It will take care of finding other instances of EspGrid on the network and coordinate timing. From experience, EspGrid works best if you are using the same Windows operating systems i.e. both Windows 8 or Windows 10 as you can sometimes run into problems if they are different. This could be because they were "built" on different OS's but this will be looked into further. Take a look at [EspGrid's OSC Protocol](https://github.com/dktr0/EspGrid/blob/master/OSC.md) to find out how to change tempo over OSC from your application.
+
 ---
 
 # Adding a directory to your system path
