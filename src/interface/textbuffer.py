@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from .tkimport import Tk, tkFileDialog, tkMessageBox
+from .tkimport import Tk, tkFileDialog, tkMessageBox, tkFont
 
 from .textbox import ThreadSafeText
 from .console import Console
@@ -810,8 +810,8 @@ class BufferTab(Tk.LabelFrame):
     def change_font_size(self, amount):
         """ Updates the font sizes of the text based on `amount` which
             can be positive or negative """
-        self.root.grid_propagate(False)
-        for font in self.text.font_names:
+        self.grid_propagate(False)
+        for font in self.root.font_names:
             font = tkFont.nametofont(font)
             size = font.actual()["size"] + amount
             if size >= 8:
@@ -824,6 +824,8 @@ class BufferTab(Tk.LabelFrame):
                 shift = 2 * (1 if amount > 0 else -1)
 
                 self.line_numbers.config(width=self.line_numbers.winfo_width() + shift)
+
+                self.text.refresh_peer_labels()
 
         return
 
