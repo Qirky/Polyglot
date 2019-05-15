@@ -508,9 +508,12 @@ class ThreadSafeText(Tk.Text, OTClient):
         return
 
     def refresh_peer_labels(self):
-        ''' Updates the locations of the peers to their marks'''
+        ''' Updates the locations of the peers to their marks and redraws the line numbers'''
         for peer_id, peer in self.root.peers.items():
-             peer.redraw()
+            # if the peer is in this textbox
+            if peer.get_buf_id() == self.parent.id:
+                peer.redraw()
+        self.parent.line_numbers.redraw()
         return
 
     def yview(self, *args):

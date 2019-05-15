@@ -496,10 +496,10 @@ class Interface(BasicInterface):
 
             pass
 
-        self.redraw()
+        # self.redraw()
 
         # Recursive call
-        self.root.after(30, self.listen)
+        self.root.after(300, self.listen)
         return
 
     # Interface toggles

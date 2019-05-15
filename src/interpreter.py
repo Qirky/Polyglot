@@ -154,6 +154,7 @@ class Interpreter(DummyInterpreter):
         self.is_alive = True
 
         self.console = sys.stdout # can be overwritten
+        self.is_reading_from_stdout = False
 
         self.setup()
 
@@ -215,6 +216,7 @@ class Interpreter(DummyInterpreter):
         return [(match.start(), match.end()) for match in self.comment_regex.finditer(string)]
 
     def write_stdout(self, string):
+        """ Write text to the language process stdin """
         if self.is_alive:
             self.lang.stdin.write(self.format(string))
             self.lang.stdin.flush()
@@ -226,6 +228,11 @@ class Interpreter(DummyInterpreter):
         self.print_stdin(string, *args, **kwargs)
         # Pipe to the subprocess
         self.write_stdout(string)
+        # Read from subprocess after 0.1 sec
+        def read():
+            time.sleep(0.1)
+            self.read_from_stdout()
+        threading.Thread(target=read).start()
         return
 
     def stdout(self, text=""):
@@ -235,16 +242,23 @@ class Interpreter(DummyInterpreter):
                 self.is_alive = False
                 break
             try:
-                # Check contents of file
-                self.f_out.seek(0)
-                for stdout_line in iter(self.f_out.readline, ""):
-                    self.console.write(stdout_line.rstrip())                
-                # clear tmpfile
-                self.f_out.truncate(0)
-                time.sleep(0.05)
+                self.read_from_stdout()
+                time.sleep(0.5)
             except ValueError as e:
                 print(e)
                 return
+        return
+
+    def read_from_stdout(self):
+        if self.is_reading_from_stdout is False:
+            self.is_reading_from_stdout = True
+            # Check contents of file
+            self.f_out.seek(0)
+            for stdout_line in iter(self.f_out.readline, ""):
+                self.console.write(stdout_line.rstrip())                
+            # clear tmpfile
+            self.f_out.truncate(0)
+            self.is_reading_from_stdout = False
         return
 
     def kill(self):
