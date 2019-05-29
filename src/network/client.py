@@ -87,24 +87,6 @@ class Client:
 
         # Choose the language to use
 
-        # try:
-
-        #     lang = getInterpreter(lang)
-
-        #     if lang in langtypes:
-
-        #         self.lang = langtypes[lang](self.args)
-
-        #     else:
-
-        #         self.lang = Interpreter(lang, self.args)
-
-        # except ExecutableNotFoundError as e:
-
-        #     print(e)
-
-        #     self.lang = DummyInterpreter()
-
         self.lang = lang
 
         # Create address book
