@@ -269,6 +269,12 @@ class Peer:
     def move(self, buf, loc, raised = False, local_operation = False):
         """ Updates the location of the Peer's label """
 
+        # Get existing buffer id
+
+        old_buffer = self.get_buffer() if (self.get_buf_id() != buf) else None
+
+        # Get new buffer id
+
         self.buf_id = buf
 
         # Get the buffer
@@ -319,6 +325,10 @@ class Peer:
             if text_widget.is_refreshing is False:
 
                 text_widget.refresh_peer_labels()
+
+            if old_buffer is not None:
+
+                old_buffer.redraw()
 
         except Tk.TclError as e:
 

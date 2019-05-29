@@ -87,6 +87,8 @@ class Interface(BasicInterface):
 
         self.handles = {}
 
+        self.add_ignore_handle() # For other messages
+
         self.add_handle(MSG_CONNECT,            self.handle_connect)
         self.add_handle(MSG_OPERATION,          self.handle_operation)
         self.add_handle(MSG_SET_MARK,           self.handle_set_mark)
@@ -98,7 +100,6 @@ class Interface(BasicInterface):
         self.add_handle(MSG_SET_ALL,            self.handle_set_all)
         self.add_handle(MSG_RESET,              self.handle_soft_reset)
         self.add_handle(MSG_REQUEST_ACK,        self.handle_request_ack)
-        # self.add_handle(MSG_CONSTRAINT,         self.handle_text_constraint)
 
         # Set title and configure the interface grid
 
@@ -197,6 +198,11 @@ class Interface(BasicInterface):
     # Top-level handling
     # ==================
 
+    def add_ignore_handle(self):
+        """ Adds a handler for ignoring messages """
+        self.handles[-1] = lambda *args: None
+        return
+
     def add_handle(self, msg_cls, func):
         """ Associates a received message class with a method or function """
         self.handles[msg_cls.type] = func
@@ -204,7 +210,8 @@ class Interface(BasicInterface):
 
     def handle(self, message):
         ''' Passes the message onto the correct handler '''
-        return self.handles[message.type](message)
+        # return self.handles[message.type](message)
+        return self.handles.get(message.type, -1)(message)
 
     # Main loop actions
     # =================

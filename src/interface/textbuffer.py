@@ -1021,10 +1021,10 @@ class BufferTab(Tk.LabelFrame):
 
     def redraw(self):
         """ Calls any redraw method e.g. line numbers """
-        if self.frame_count == self.frame_reset:
-            self.line_numbers.redraw()
-            self.frame_count = 0
-        self.frame_count += 1
+        # if self.frame_count == self.frame_reset:
+        self.line_numbers.redraw()
+        # self.frame_count = 0
+        # self.frame_count += 1
         return
 
     def cycle_buffer(self, event=None):

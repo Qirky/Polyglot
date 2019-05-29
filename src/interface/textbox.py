@@ -111,6 +111,8 @@ class ThreadSafeText(Tk.Text, OTClient):
 
             try:
 
+                # print(operation.ops) -- could do manually instead of "refresh"
+
                 new_text = operation(self.read())
 
             except IncompatibleOperationError as err:

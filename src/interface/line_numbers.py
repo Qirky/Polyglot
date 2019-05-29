@@ -9,6 +9,7 @@ class LineNumbers(Tk.Canvas):
         self.parent     = parent      # buffer
         self.root       = parent.root # interface
         self.textwidget = parent.text # text
+        self.redraw()
 
     def redraw(self, *args):
         '''Redraws the line numbers at 30 fps'''
