@@ -90,8 +90,13 @@ class DummyInterpreter:
         return block
 
     def is_active(self):
-        """ Returns true if not using a dummer interpreter """
+        """ Returns true if not using a dummy interpreter """
         return self.lang is not None
+
+    @classmethod
+    def is_true_lang(cls):
+        """ Returns True if this is not the dummy interpreter """
+        return cls.__name__ != "DummyInterpreter"
     
     def evaluate(self, string, *args, **kwargs):
         self.print_stdin(string, *args, **kwargs)

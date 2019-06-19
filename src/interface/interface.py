@@ -101,6 +101,7 @@ class Interface(BasicInterface):
         self.add_handle(MSG_RESET,              self.handle_soft_reset)
         self.add_handle(MSG_REQUEST_ACK,        self.handle_request_ack)
         self.add_handle(MSG_CONSOLE,            self.handle_console_message)
+        self.add_handle(MSG_LANG_LEADER,        self.handle_update_lang_leader)
 
         # Set title and configure the interface grid
 
@@ -263,7 +264,7 @@ class Interface(BasicInterface):
 
                 self.add_new_user(message['src_id'], message['name'])
 
-            print("Peer '{}' has joined the session".format(message['name'])) # Maybe add a popup?
+            # print("Peer '{}' has joined the session".format(message['name'])) # Maybe add a popup?
 
         return
 
@@ -342,6 +343,14 @@ class Interface(BasicInterface):
     def handle_console_message(self, message):
         """ Prints a console message received from another user """
         self.buffers[message['buf_id']].text.handle_console_message(message)
+        return
+
+    def handle_update_lang_leader(self, message):
+        """ Tells the local peer to be a language leader for languages that 
+            it is the only active user of """
+
+        self.local_peer.update_lang_leader_info(message['flags'])
+
         return
 
     # def handle_text_constraint(self, message):

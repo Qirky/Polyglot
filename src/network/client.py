@@ -101,14 +101,13 @@ class Client:
 
         # Send information about this client to the server
 
-        self.send( MSG_CONNECT(self.id, self.name, self.send.hostname, self.send.port) )
+        self.send( MSG_CONNECT(self.id, self.name, self.send.hostname, self.send.port, self.get_lang_choices()) )
 
         # Give the recv / send a reference to the user-interface
         self.recv.ui = self.ui
         self.send.ui = self.ui
 
         self.ui.run()
-
 
     @staticmethod
     def read_configuration_file(filename):
@@ -121,6 +120,10 @@ class Client:
                 except:
                     pass
         return str(conf['host']), int(conf['port'])
+
+    def get_lang_choices(self):
+        """ Returns a list of which languages are being used denoted by 1 (chosen) and 0 """
+        return [int(lang[0].is_true_lang()) for lang in self.lang.values()]
 
     def update_send(self):
         """ Continually polls the queue and sends any messages to the server """

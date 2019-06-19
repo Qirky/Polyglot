@@ -110,6 +110,7 @@ class Peer:
         
         self.root   = root # interface
         self.buf_id = buf # Index of the buffer to draw in
+        self.lang_leader_info = [] # List of which language this peer is the leader of
 
         self.name = Tk.StringVar()
         self.name.set(name)
@@ -538,6 +539,14 @@ class Peer:
     def refresh(self):
         """ Don't move the marker but redraw it """
         return self.shift(0)
+
+    def is_language_leader(self, lang_id):
+        """ Tests if a user has been labelled as the language leader """
+        return bool(self.lang_leader_info[lang_id])
+
+    def update_lang_leader_info(self, lang_info):
+        self.lang_leader_info = lang_info
+        return
 
     def get_buf_id(self):
         return self.buf_id

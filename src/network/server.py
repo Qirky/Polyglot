@@ -41,6 +41,10 @@ class PolyServer(ThreadedServer):
         # Dict of IDs to OTServer instances
 
         self.buffers = {i : TextHandler() for i in DEFAULT_INTERPRETERS}
+
+        # Dict of IDs to first user to connect using that language
+
+        self.lang_leaders = {i: None for i in DEFAULT_INTERPRETERS}
           
         # Address information
         self.hostname = str(socket.gethostname())
@@ -153,6 +157,33 @@ class PolyServer(ThreadedServer):
 
                 client.send(msg)
                 # client.send(self.get_text_constraint())
+
+        return
+
+    def update_language_leaders(self, client):
+        """ Update the language leaders dict and send a message to the client """
+
+        # 1. Check if language leaders are connected
+
+        leader_info = []
+
+        for i, leader in self.lang_leaders.items():
+
+            if leader is None or leader.is_connected() is False:
+
+                self.lang_leaders[i] = client
+
+                leader_info.append(1)
+
+            else:
+
+                leader_info.append(0)
+
+        # 2. Send notification to the client 
+
+        msg = MSG_LANG_LEADER(-1, leader_info)
+
+        client.send(msg)
 
         return
 
@@ -501,7 +532,9 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
         if self.client_address not in list(self.server.clients.values()):
 
-            new_client = Client(self, name=msg['name'])
+            new_client = Client(self, name=msg['name'], lang_choices=msg['lang_choices']) # decide leader? TODO
+
+            self.server.update_language_leaders(new_client)
 
             self.client_name = new_client.name
            
@@ -617,7 +650,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
         # Connect each client
 
-        msg1 = MSG_CONNECT(new_client.id, new_client.name, new_client.hostname, new_client.port)
+        msg1 = MSG_CONNECT(new_client.id, new_client.name, new_client.hostname, new_client.port, new_client.lang_choices)
 
         for client in list(self.server.clients.values()):
 
@@ -631,7 +664,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
                 if client != self.client_info:
 
-                    msg2 = MSG_CONNECT(client.id, client.name, client.hostname, client.port)
+                    msg2 = MSG_CONNECT(client.id, client.name, client.hostname, client.port, client.lang_choices)
 
                     new_client.send(msg2)
 
@@ -650,7 +683,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
 class Client:
     bytes = PolyServer.bytes
-    def __init__(self, handler, name=""):
+    def __init__(self, handler, name, lang_choices):
 
         self.handler = handler
 
@@ -671,6 +704,10 @@ class Client:
         self.index  = 0
         self.connected = True
 
+        # Selection of active languages
+
+        self.lang_choices = lang_choices
+
         # A list of messages to process
 
         self.messages = []
@@ -682,6 +719,9 @@ class Client:
     def connect(self, socket):
         self.connected = True
         self.source = socket
+
+    def is_connected(self):
+        return self.connected
         
     def get_index(self):
         return self.index

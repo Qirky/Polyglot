@@ -229,9 +229,10 @@ class BufferTab(Tk.LabelFrame):
     def send_console_message(self, response):
         """ Sends a console response from a user running a language to other user's not using that language """
         # Only send if the "language leader"
-        if True:
+        if self.root.local_peer.is_language_leader(self.id):
             message = MSG_CONSOLE(self.root.local_peer.id, response)
-        return self.send_message(message)
+            self.send_message(message)
+        return 
 
     def soft_reset(self):
         """ Sets the revision number to 0 and sets the document contents """
