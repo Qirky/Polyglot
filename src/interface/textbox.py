@@ -337,6 +337,13 @@ class ThreadSafeText(Tk.Text, OTClient):
         
         return
 
+    def handle_console_message(self, message):
+        """ Prints a message to the console if not running an active language in this buffer """
+        if not self.parent.lang.is_active():
+            response = message['text']
+            self.parent.console.write(response)
+        return
+
     # Reading and writing to the text box
     # ===================================
 

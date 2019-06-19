@@ -286,6 +286,12 @@ class MSG_REQUEST_ACK(MESSAGE):
         self['flag'] = int(flag)
         self["reply"] = reply
 
+class MSG_CONSOLE(MESSAGE):
+    type = 15
+    def __init__(self, src_id, text):
+        MESSAGE.__init__(self, src_id)
+        self['text'] = str(text)
+
 # class MSG_CONSTRAINT(MESSAGE):
 #     type = 15
 #     def __init__(self, src_id, constraint_id):
@@ -313,6 +319,7 @@ MESSAGE_TYPE = {msg.type : msg for msg in [
         MSG_RESET,
         MSG_CONNECT_ACK,
         MSG_REQUEST_ACK,
+        MSG_CONSOLE,
         # MSG_CONSTRAINT,
     ]
 }

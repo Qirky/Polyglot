@@ -33,7 +33,7 @@ import time
 import threading
 import shlex
 import tempfile
-import os.path
+import os, os.path
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 
@@ -51,6 +51,7 @@ def colour_format(text, colour):
 
 class DummyInterpreter:
     stop_sound = ""
+    lang = None
     def __init__(self, *args, **kwargs):
         self.re={}
 
@@ -87,6 +88,10 @@ class DummyInterpreter:
         block[1] = line
 
         return block
+
+    def is_active(self):
+        """ Returns true if not using a dummer interpreter """
+        return self.lang is not None
     
     def evaluate(self, string, *args, **kwargs):
         self.print_stdin(string, *args, **kwargs)
@@ -229,10 +234,10 @@ class Interpreter(DummyInterpreter):
         # Pipe to the subprocess
         self.write_stdout(string)
         # Read from subprocess after 0.1 sec
-        def read():
-            time.sleep(0.1)
-            self.read_from_stdout()
-        threading.Thread(target=read).start()
+        # def read():
+        #     time.sleep(0.05)
+        #     self.read_from_stdout()
+        # threading.Thread(target=read).start()
         return
 
     def stdout(self, text=""):
@@ -242,8 +247,11 @@ class Interpreter(DummyInterpreter):
                 self.is_alive = False
                 break
             try:
-                self.read_from_stdout()
-                time.sleep(0.5)
+                response = self.read_from_stdout()
+                # Send the response
+                if response:
+                    self.console.root.send_console_message(response)
+                time.sleep(0.1)
             except ValueError as e:
                 print(e)
                 return
@@ -252,14 +260,17 @@ class Interpreter(DummyInterpreter):
     def read_from_stdout(self):
         if self.is_reading_from_stdout is False:
             self.is_reading_from_stdout = True
+            # Store the text response
+            response = []
             # Check contents of file
             self.f_out.seek(0)
             for stdout_line in iter(self.f_out.readline, ""):
-                self.console.write(stdout_line.rstrip())                
+                response.append( stdout_line.rstrip() )
+                self.console.write(response[-1]) 
             # clear tmpfile
             self.f_out.truncate(0)
             self.is_reading_from_stdout = False
-        return
+        return "\n".join(response)
 
     def kill(self):
         """ Stops communicating with the subprocess """
@@ -383,8 +394,8 @@ class OSCInterpreter(Interpreter):
     """ Class for sending messages via OSC instead of using a subprocess """
     def __init__(self):
         self.re = {"tag_bold": self.find_keyword, "tag_italic": self.find_comment}
-        self.lang = OSC.OSCClient()
-        self.lang.connect((self.host, self.port))
+        self.client = OSC.OSCClient()
+        self.client.connect((self.host, self.port))
 
     # Overload to not activate a server
     def start(self, *args, **kwargs):
@@ -392,7 +403,7 @@ class OSCInterpreter(Interpreter):
 
     def kill(self):
         self.evaluate(self.get_stop_sound())
-        self.lang.close()
+        self.client.close()
         return
 
     def new_osc_message(self, string):
@@ -403,8 +414,10 @@ class OSCInterpreter(Interpreter):
         # Print to the console the message
         Interpreter.print_stdin(self, string, *args, **kwargs)
         # Create an osc message and send to the server
-        self.lang.send(self.new_osc_message(string))
+        self.client.send(self.new_osc_message(string))
         return
+
+# Old OSC Interpreter
 
 class SuperColliderInterpreter(OSCInterpreter):
     name = "SuperCollider"
@@ -416,6 +429,167 @@ class SuperColliderInterpreter(OSCInterpreter):
 
     def __repr__(self):
         return "SuperCollider"
+
+    def new_osc_message(self, string):
+        """ Returns OSC message for Troop Quark """
+        msg = OSC.OSCMessage("/troop")
+        msg.append([string])
+        return msg
+
+    def synchronise(self):
+        self.evaluate("s.latency=0.2")
+        self.evaluate("TempoClock.default = EspClock.new")
+        return
+
+    @classmethod
+    def find_comment(cls, string):        
+        instring, instring_char = False, ""
+        for i, char in enumerate(string):
+            if char in ('"', "'"):
+                if instring:
+                    if char == instring_char:
+                        instring = False
+                        instring_char = ""
+                else:
+                    instring = True
+                    instring_char = char
+            elif char == "/":
+                if not instring and i < len(string) and string[i + 1] == "/":
+                    return [(i, len(string))]
+        return []
+
+    def get_block_of_code(self, text, index):
+        """ Returns the start and end line numbers of the text to evaluate when pressing Ctrl+Return. """
+
+        # Get start and end of the buffer
+        start, end = "1.0", text.index("end")
+        lastline   = int(end.split('.')[0]) + 1
+
+        # Indicies of block to execute
+        block = [0,0]        
+        
+        # 1. Get position of cursor
+        cur_y, cur_x = index.split(".")
+        cur_y, cur_x = int(cur_y), int(cur_x)
+
+        left_cur_y, left_cur_x   = cur_y, cur_x
+        right_cur_y, right_cur_x = cur_y, cur_x
+
+        # Go back to find a left bracket
+
+        while True:
+
+            new_left_cur_y,  new_left_cur_x  = self.get_left_bracket(text, left_cur_y, left_cur_x)
+            new_right_cur_y, new_right_cur_x = self.get_right_bracket(text, right_cur_y, right_cur_x)
+
+            if new_left_cur_y is None or new_right_cur_y is None:
+
+                block = [left_cur_y, right_cur_y + 1]
+
+                break
+
+            else:
+
+                left_cur_y,  left_cur_x  = new_left_cur_y,  new_left_cur_x
+                right_cur_y, right_cur_x = new_right_cur_y, new_right_cur_x
+
+        return block
+
+    def get_left_bracket(self, text, cur_y, cur_x):
+        count = 0
+        line_text = text.get("{}.{}".format(cur_y, 0), "{}.{}".format(cur_y, "end"))
+        for line_num in range(cur_y, 0, -1):
+            # Only check line if it has text
+            if len(line_text) > 0:
+                for char_num in range(cur_x - 1, -1, -1):
+                    
+                    try:
+                        char = line_text[char_num] 
+                    except IndexError as e:
+                        print("left bracket, string is {}, index is {}".format(line_text, char_num))
+                        raise(e)
+
+                    if char == ")":
+                        count += 1
+                    elif char == "(":
+                        if count == 0:
+                            return line_num, char_num
+                        else:
+                            count -= 1
+            line_text = text.get("{}.{}".format(line_num - 1, 0), "{}.{}".format(line_num - 1, "end"))
+            cur_x     = len(line_text)
+        return None, None
+
+    def get_right_bracket(self, text, cur_y, cur_x):
+        num_lines = int(text.index("end").split(".")[0]) + 1
+        count = 0
+        for line_num in range(cur_y, num_lines):
+            line_text = text.get("{}.{}".format(line_num, 0), "{}.{}".format(line_num, "end"))
+            # Only check line if it has text
+            if len(line_text) > 0:
+                for char_num in range(cur_x, len(line_text)):
+                    
+                    try:
+                        char = line_text[char_num] 
+                    except IndexError as e:
+                        print("right bracket, string is {}, index is {}".format(line_text, char_num))
+                        raise(e)
+
+                    if char == "(":
+                        count += 1
+                    if char == ")":
+                        if count == 0:
+                            return line_num, char_num + 1
+                        else:
+                            count -= 1
+            cur_x = 0
+        else:
+            return None, None
+
+# Work in progress sc interpreter            
+
+class _SuperColliderInterpreter(BuiltinInterpreter, OSCInterpreter):
+    name = "SuperCollider"
+    path = ""
+    stop_sound = "s.freeAll"
+    filetype = ".scd"
+    host = 'localhost'
+    port = 57120
+    id = 2
+    def __init__(self, *args, **kwargs):
+        BuiltinInterpreter.__init__(self, *args, **kwargs)
+        OSCInterpreter.__init__(self, *args, **kwargs)
+
+    def __repr__(self):
+        return "SuperCollider"
+
+    def start(self, *args, **kwargs):
+        """ Need to find the path for sclang and give it a startup file """
+
+        # Boot supercollider and read from it
+
+        from .boot import supercollider
+
+        sc_path = supercollider.find_path()
+
+        fn_path = supercollider.get_startup_file(True, False) # TODO update with FoxDot and Tidal information
+
+        os.chdir(os.path.dirname(sc_path))
+
+        self.path = [sc_path, fn_path]
+
+        # Listen from the process
+
+        BuiltinInterpreter.start(self, *args, **kwargs)
+
+        # Send messages to the OSC
+
+        OSCInterpreter.start(self, *args, **kwargs)
+
+    def kill(self):
+        BuiltinInterpreter.kill(self)
+        # OSCInterpreter.kill(self)
+        return
 
     def new_osc_message(self, string):
         """ Returns OSC message for Troop Quark """

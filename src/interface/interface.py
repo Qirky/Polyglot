@@ -100,6 +100,7 @@ class Interface(BasicInterface):
         self.add_handle(MSG_SET_ALL,            self.handle_set_all)
         self.add_handle(MSG_RESET,              self.handle_soft_reset)
         self.add_handle(MSG_REQUEST_ACK,        self.handle_request_ack)
+        self.add_handle(MSG_CONSOLE,            self.handle_console_message)
 
         # Set title and configure the interface grid
 
@@ -338,6 +339,11 @@ class Interface(BasicInterface):
         
         return
 
+    def handle_console_message(self, message):
+        """ Prints a console message received from another user """
+        self.buffers[message['buf_id']].text.handle_console_message(message)
+        return
+
     # def handle_text_constraint(self, message):
     #     """ A new text constrait is set """ # TODO: implement the constraints again
     #     self.buffers[message["buf_id"]].text.handle_text_constraint(message)
@@ -359,6 +365,7 @@ class Interface(BasicInterface):
             stdout(e.__class__.__name__, e)
         
         BasicInterface.kill(self)
+        
         return
 
     def freeze_kill(self, err):
