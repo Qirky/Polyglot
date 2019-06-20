@@ -169,7 +169,7 @@ class PolyServer(ThreadedServer):
 
         for i, leader in self.lang_leaders.items():
 
-            if leader is None or leader.is_connected() is False:
+            if client.lang_choices[i] == 1 and (leader is None or leader.is_connected() is False):
 
                 self.lang_leaders[i] = client
 

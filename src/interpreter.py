@@ -9,7 +9,7 @@
 from __future__ import absolute_import
 from .config import *
 
-from subprocess import Popen
+from subprocess import Popen, TimeoutExpired
 from subprocess import PIPE, STDOUT
 from datetime import datetime
 
@@ -102,7 +102,7 @@ class DummyInterpreter:
         self.print_stdin(string, *args, **kwargs)
         return
 
-    def start(self, out=None):
+    def start(self, out=None, **kwargs):
         if out is not None:
             self.console = out
         return self
@@ -282,7 +282,11 @@ class Interpreter(DummyInterpreter):
         # End process if not done so already
         self.is_alive = False
         if self.lang.poll() is None:
-            self.lang.communicate()
+            try:
+                self.lang.communicate(timeout=3)
+            except TimeoutExpired:
+                self.lang.kill()
+                self.lang.communicate()
 
 class BuiltinInterpreter(Interpreter):
     def __init__(self):
@@ -424,7 +428,7 @@ class OSCInterpreter(Interpreter):
 
 # Old OSC Interpreter
 
-class SuperColliderInterpreter(OSCInterpreter):
+class _SuperColliderInterpreter(OSCInterpreter):
     name = "SuperCollider"
     stop_sound = "s.freeAll"
     filetype = ".scd"
@@ -553,7 +557,7 @@ class SuperColliderInterpreter(OSCInterpreter):
 
 # Work in progress sc interpreter            
 
-class _SuperColliderInterpreter(BuiltinInterpreter, OSCInterpreter):
+class SuperColliderInterpreter(BuiltinInterpreter, OSCInterpreter):
     name = "SuperCollider"
     path = ""
     stop_sound = "s.freeAll"
@@ -577,7 +581,7 @@ class _SuperColliderInterpreter(BuiltinInterpreter, OSCInterpreter):
 
         sc_path = supercollider.find_path()
 
-        fn_path = supercollider.get_startup_file(True, False) # TODO update with FoxDot and Tidal information
+        fn_path = supercollider.get_startup_file(*kwargs.get("lang_choices", [0, 0, 1])[:2]) # update with FoxDot and Tidal information
 
         os.chdir(os.path.dirname(sc_path))
 
@@ -592,7 +596,9 @@ class _SuperColliderInterpreter(BuiltinInterpreter, OSCInterpreter):
         OSCInterpreter.start(self, *args, **kwargs)
 
     def kill(self):
-        BuiltinInterpreter.kill(self)
+        """ Force SC to kill - hangs on communicate """
+        self.lang.kill()
+        # BuiltinInterpreter.kill(self)
         # OSCInterpreter.kill(self)
         return
 

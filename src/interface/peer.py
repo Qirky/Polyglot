@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from .tkimport import Tk
     
+from ..interpreter import DEFAULT_INTERPRETERS
 from ..config import *
 from ..utils import *
 
@@ -110,7 +111,10 @@ class Peer:
         
         self.root   = root # interface
         self.buf_id = buf # Index of the buffer to draw in
-        self.lang_leader_info = [] # List of which language this peer is the leader of
+        
+        # List of which language this peer is the leader of
+        
+        self.lang_leader_info = [0 for _ in DEFAULT_INTERPRETERS] 
 
         self.name = Tk.StringVar()
         self.name.set(name)

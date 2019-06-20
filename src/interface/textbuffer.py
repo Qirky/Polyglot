@@ -197,7 +197,7 @@ class BufferTab(Tk.LabelFrame):
 
         # Startup interpreter -- give interpreter information about this widget - i.e. console
 
-        self.lang.start(out=self.console)
+        self.lang.start(out=self.console, lang_choices=self.root.client.get_lang_choices())
 
         # Only sync if told explicitly
 
@@ -229,9 +229,10 @@ class BufferTab(Tk.LabelFrame):
     def send_console_message(self, response):
         """ Sends a console response from a user running a language to other user's not using that language """
         # Only send if the "language leader"
-        if self.root.local_peer.is_language_leader(self.id):
-            message = MSG_CONSOLE(self.root.local_peer.id, response)
-            self.send_message(message)
+        if self.root.local_peer is not None:
+            if self.root.local_peer.is_language_leader(self.id):
+                message = MSG_CONSOLE(self.root.local_peer.id, response)
+                self.send_message(message)
         return 
 
     def soft_reset(self):

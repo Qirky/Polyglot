@@ -348,7 +348,7 @@ class Interface(BasicInterface):
     def handle_update_lang_leader(self, message):
         """ Tells the local peer to be a language leader for languages that 
             it is the only active user of """
-
+            
         self.local_peer.update_lang_leader_info(message['flags'])
 
         return
