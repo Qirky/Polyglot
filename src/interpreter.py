@@ -581,6 +581,9 @@ class SuperColliderInterpreter(BuiltinInterpreter, OSCInterpreter):
 
         sc_path = supercollider.find_path()
 
+        if sc_path is None: 
+            return
+        
         fn_path = supercollider.get_startup_file(*kwargs.get("lang_choices", [0, 0, 1])[:2]) # update with FoxDot and Tidal information
 
         os.chdir(os.path.dirname(sc_path))
