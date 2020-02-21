@@ -31,5 +31,7 @@ def find_path():
         print("Operating system unrecognised")
         #Potentially get the user to choose their OS from a list?
         #Then run the corresponding functions
+        
+        sclangloc = None
 
     return sclangloc
